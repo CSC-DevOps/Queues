@@ -70,7 +70,7 @@ Use curl to help you upload easily.
 
 	curl -F "image=@./img/morning.jpg" localhost:3000/upload
 
-Have `upload` store the images in a queue.  Have `meow` display the most recent image to the client and *remove* the image from the queue.
+Have `upload` store the images in a queue.  Have `meow` display the most recent image to the client and *remove* the image from the queue. Note, this is more like a stack.
 
 ### Proxy server
 
