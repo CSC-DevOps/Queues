@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "7"
+  - "node"
+services:
+  - redis-server
+script:
+  - node main.js &
+  - npm test
