@@ -1,6 +1,8 @@
 Cache, Proxies, Queues
 =========================
 
+![build](https://travis-ci.org/CSC-DevOps/Queues.svg?branch=master)
+
 ### Setup
 
 * Clone this repo, run `npm install`.
