@@ -12,7 +12,7 @@ Cache, Proxies, Queues
   ```
 * Create a new virtual machine using the `queues` image:
   ```bash
-  bakerx run queues queues --ip 192.168.44.80 --sync
+  bakerx run queues queues --ip 192.168.44.81 --sync
   ```
 * Run `bakerx ssh queues` to connect to the virtual machine.
 * Go to the sync folder (this repo) and install npm dependencies:
@@ -65,12 +65,12 @@ client.get("key", function(err,value){ console.log(value)});
 
 Create two routes, `/get` and `/set`.
 
-When [`/set`](http://192.168.44.80:3000/set) is visited (i.e. GET request), set a new key, with the value:
+When [`/set`](http://192.168.44.81:3000/set) is visited (i.e. GET request), set a new key, with the value:
 > "this message will self-destruct in 10 seconds".
 
 Use the [EXPIRE](https://redis.io/commands/expire) command to make sure this key will expire in 10 seconds.
 
-When [`/get`](http://192.168.44.80:3000/get) is visited (i.e. GET request), fetch that key, and send its value back to the client: `res.send(value)`.
+When [`/get`](http://192.168.44.81:3000/get) is visited (i.e. GET request), fetch that key, and send its value back to the client: `res.send(value)`.
 
 
 ### Task 2: Recent visited sites
@@ -95,10 +95,10 @@ A stub for upload and meow has already been provided.
 Use curl to help you upload easily.
 
 ```bash
-curl -F "image=@./img/morning.jpg" http://192.168.44.80:3000/upload
+curl -F "image=@./img/morning.jpg" http://192.168.44.81:3000/upload
 ```
 
-Have `/upload` store the images in a queue.  Have [`/meow`](http://192.168.44.80:3000/meow) display the most recent image to the client and *remove* the image from the queue. Note, this is more like a stack and you can use [`LPOP`](https://redis.io/commands/lpop) redis command to implement this functionality.
+Have `/upload` store the images in a queue.  Have [`/meow`](http://192.168.44.81:3000/meow) display the most recent image to the client and *remove* the image from the queue. Note, this is more like a stack and you can use [`LPOP`](https://redis.io/commands/lpop) redis command to implement this functionality.
 
 ### Proxy server
 
