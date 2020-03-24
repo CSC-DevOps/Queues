@@ -1,79 +1,84 @@
-var redis = require('redis')
-var multer  = require('multer')
-var express = require('express')
-var fs      = require('fs')
-var app = express()
+const express = require('express');
+const app = express();
+
+const multer = require('multer');
+const fs = require('fs');
+
 // REDIS
-var client = redis.createClient(6379, '127.0.0.1', {})
+const redis = require('redis');
+let client = redis.createClient(6379, '127.0.0.1', {});
+
+///////////// GLOBAL HOOK
+
+// Add hook to make it easier to get all visited URLS.
+app.use(function (req, res, next) {
+  console.log(req.method, req.url);
+
+  // Task 2 ... INSERT HERE.
+  // TODO: Store recent routes
+
+  next(); // Passing the request to the next handler in the stack.
+});
 
 ///////////// WEB ROUTES
 
-// Add hook to make it easier to get all visited URLS.
-app.use(function(req, res, next) 
-{
-	console.log(req.method, req.url);
-
-	// ... INSERT HERE.
-	next(); // Passing the request to the next handler in the stack.
-});
-
-
-app.get('/test', function(req, res) {
-	{
-		res.writeHead(200, {'content-type':'text/html'});
-		res.write("<h3>test</h3>");
-   		res.end();
-	}
+// responding to GET request to / route (http://IP:3000/)
+app.get('/', function (req, res) {
+  res.send('hello world')
 })
 
-function get_line(filename, line_no, callback) {
-    var data = fs.readFileSync(filename, 'utf8');
-    var lines = data.split("\n");
+app.get('/test', function (req, res) {
+  res.writeHead(200, { 'content-type': 'text/html' });
+  res.write('test');
+  res.end();
+})
 
-    if(+line_no > lines.length){
-      throw new Error('File end reached without finding line');
-    }
+// Task 1 ===========================================
 
-    callback(null, lines[+line_no]);
-}
+// TODO: Create two routes, `/get` and `/set`.
 
-// app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
-//    console.log(req.body) // form fields
-//    console.log(req.files) // form files
+// ===================================================
 
-//    if( req.files.image )
-//    {
-// 	   fs.readFile( req.files.image.path, function (err, data) {
-// 	  		if (err) throw err;
-// 	  		var img = new Buffer(data).toString('base64');
-// 			console.log(img);
-			  
-// 			client.lpush('cats', img, function(err)
-// 			{
 
-// 				res.status(204).end()
-// 			});
-// 		});
-// 	}
-// }]);
+// Task 2 ============================================
 
-// app.get('/meow', function(req, res) {
-// 	{
-// 		res.writeHead(200, {'content-type':'text/html'});
-// 		console.log(err || imagedata)
-// 		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
-// 		res.end();
-// 		//items.forEach(function (imagedata) 
-// 		//{
-// 		//});
-// 	}
-// })
+// TODO: Create a new route, `/recent`
+
+// ===================================================
+
+
+// Task 3 ============================================
+const upload = multer({ dest: './uploads/' })
+app.post('/upload', upload.single('image'), function (req, res) {
+  console.log(req.body) // form fields
+  console.log(req.file) // form files
+
+  if (req.file.fieldname === 'image') {
+    fs.readFile(req.file.path, function (err, data) {
+      if (err) throw err;
+      var img = new Buffer(data).toString('base64');
+      console.log(img);
+
+      client.lpush('cats', img, function (err) {
+        res.status(204).end()
+      });
+    });
+  }
+});
+
+app.get('/meow', function (req, res) {
+  res.writeHead(200, { 'content-type': 'text/html' });
+
+  // res.write("<h1>\n<img src='data:my_pic.jpg;base64," + imagedata + "'/>");
+  res.end();
+})
+// ===================================================
 
 // HTTP SERVER
-var server = app.listen(3000, function () {
+let server = app.listen(3000, function () {
 
-  var host = server.address().address
-  var port = server.address().port
+  const host = server.address().address;
+  const port = server.address().port;
 
-  console.log('Example app listening at http://%s:%s', host, port)
+  console.log(`Example app listening at http://${host}:${port}`);
 })

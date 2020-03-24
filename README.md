@@ -5,64 +5,88 @@ Cache, Proxies, Queues
 
 ### Setup
 
-* Clone this repo, run `npm install`.
-* Install redis and run on localhost:6379
+* Clone this repo and change directory to the repo.
+* Pull `queues` virtual machine image which has the prerequisites you need for this workshop (nodejs, redis):
+  ```
+  bakerx pull CSC-DevOps/Images#Spring2020 queues
+  ```
+* Create a new virtual machine using the `queues` image:
+  ```bash
+  bakerx run queues queues --ip 192.168.44.80 --sync
+  ```
+* Run `bakerx ssh queues` to connect to the virtual machine.
+* Go to the sync folder (this repo) and install npm dependencies:
+  ```bash
+  cd /bakerx
+  npm install
+  ```
 
 ### A simple web server
 
-Use [express](http://expressjs.com/) to install a simple web server.
+In this workshop we use [express](http://expressjs.com/) to make a simple web server:
 
-	var server = app.listen(3000, function () {
-	
-	  var host = server.address().address
-	  var port = server.address().port
-	
-	  console.log('Example app listening at http://%s:%s', host, port)
-	})
+```js
+let server = app.listen(3000, function () {
 
-Express uses the concept of routes to use pattern matching against requests and sending them to specific functions.  You can simply write back a response body.
+  const host = server.address().address;
+  const port = server.address().port;
 
-	app.get('/', function(req, res) {
-	  res.send('hello world')
-	})
+  console.log(`Example app listening at http://${host}:${port}`);
+})
+```
+
+Express uses the concept of routes to use pattern matching against requests and sending them to specific functions. You can simply write back a response body:
+
+```js
+app.get('/', function(req, res) {
+	res.send('hello world')
+})
+```
+
+This functionality already exists in [main.js](./main.js).
 
 ### Redis
 
-You will be using [redis](http://redis.io/) to build some simple infrastructure components, using the [node-redis client](https://github.com/mranney/node_redis).
+You will be using [redis server](http://redis.io/) and [node-redis client](https://github.com/mranney/node_redis) to build some simple infrastructure components:
 
-	var redis = require('redis')
-	var client = redis.createClient(6379, '127.0.0.1', {})
+```js
+const redis = require('redis');
+const client = redis.createClient(6379, '127.0.0.1', {});
+```
 
-In general, you can run all the redis commands in the following manner: client.CMD(args). For example:
+In general, you can run all the [redis commands](https://redis.io/commands) in the following manner: `client.CMD(args)`. For example:
 
-	client.set("key", "value");
-	client.get("key", function(err,value){ console.log(value)});
+```js
+client.set("key", "value");
+client.get("key", function(err,value){ console.log(value)});
+```
 
-### An expiring cache
+### Task 1: An expiring cache
 
 Create two routes, `/get` and `/set`.
 
-When `/set` is visited, set a new key, with the value:
+When [`/set`](http://192.168.44.80:3000/set) is visited (i.e. GET request), set a new key, with the value:
 > "this message will self-destruct in 10 seconds".
 
-Use the expire command to make sure this key will expire in 10 seconds.
+Use the [EXPIRE](https://redis.io/commands/expire) command to make sure this key will expire in 10 seconds.
 
-When `/get` is visited, fetch that key, and send value back to the client: `res.send(value)` 
+When [`/get`](http://192.168.44.80:3000/get) is visited (i.e. GET request), fetch that key, and send its value back to the client: `res.send(value)`.
 
 
-### Recent visited sites
+### Task 2: Recent visited sites
 
 Create a new route, `/recent`, which will display the most recently visited sites.
 
-There is already a global hook setup, which will allow you to see each site that is requested:
+There is already a global hook (middleware) setup, which will allow you to see each site that is requested:
 
-	app.use(function(req, res, next) 
-	{
-	...
+```js
+app.use(function (req, res, next) {
+  ...
+```
 
-Use the lpush, ltrim, and lrange redis commands to store the most recent 5 sites visited, and return that to the client.
+Use [`LPUSH`](https://redis.io/commands/lpush), [`LTRIM`](https://redis.io/commands/ltrim), and[`LRANGE`](https://redis.io/commands/lrange) redis commands to store the most recent 5 sites visited, and return that to the client.
 
-### Cat picture uploads: queue
+### Task 3: Cat picture uploads using queue
 
 Implement two routes, `/upload`, and `/meow`.
  
@@ -70,9 +94,11 @@ A stub for upload and meow has already been provided.
 
 Use curl to help you upload easily.
 
-	curl -F "image=@./img/morning.jpg" localhost:3000/upload
+```bash
+curl -F "image=@./img/morning.jpg" http://192.168.44.80:3000/upload
+```
 
-Have `upload` store the images in a queue.  Have `meow` display the most recent image to the client and *remove* the image from the queue. Note, this is more like a stack.
+Have `/upload` store the images in a queue.  Have [`/meow`](http://192.168.44.80:3000/meow) display the most recent image to the client and *remove* the image from the queue. Note, this is more like a stack and you can use [`LPOP`](https://redis.io/commands/lpop) redis command to implement this functionality.
 
 ### Proxy server
 
