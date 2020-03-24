@@ -77,7 +77,7 @@ When [`/get`](http://192.168.44.80:3000/get) is visited (i.e. GET request), fetc
 
 Create a new route, `/recent`, which will display the most recently visited sites.
 
-There is already a [global hook (middleware) setup](https://github.com/ssmirr/Queues/blob/7f45eb3d7a31a2638bab419acc3b021246ff91ce/main.js#L14-L21), which will allow you to see each site that is requested:
+There is already a [global hook (middleware) setup](./main.js#L14-L21), which will allow you to see each site that is requested:
 
 ```js
 app.use(function (req, res, next) {
